@@ -1,9 +1,10 @@
 <?php
 /**
- * Created by PhpStorm.
+ * DbConnect.php
  * User: edgeorge
  * Date: 21/05/2014
  * Time: 10:14
+ * Copyright PokéChecker 2014
  */
 
 class DbConnect {
