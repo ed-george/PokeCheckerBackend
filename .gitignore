@@ -1,0 +1,7 @@
+# System
+.DS_Store
+.thumbnail
+
+# Webstorm IDE
+.idea/
+
