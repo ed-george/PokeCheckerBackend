@@ -12,6 +12,8 @@ define('DB_PASSWORD', 'root');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'poke_checker_db_main');
 
+define('HASH', 'p0kEch3CKeR');
+
 define('CREATED_SUCCESSFULLY', 0);
 define('CREATE_FAILED', 1);
 define('ALREADY_EXISTED', 2);
