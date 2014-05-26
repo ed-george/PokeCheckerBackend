@@ -12,7 +12,7 @@ class DbHandler {
     private $conn;
 
     function __construct() {
-        require_once dirname(__FILE__) . './DbConnect.php';
+        require_once dirname(__FILE__) . '/DbConnect.php';
         // opening db connection
         $db = new DbConnect();
         $this->conn = $db->connect();
@@ -67,7 +67,7 @@ class DbHandler {
      */
     public function checkLogin($username, $password) {
         // Fetch user from email
-        $stmt = $this->conn->prepare("SELECT password_hash FROM users WHERE username = ?");
+        $stmt = $this->conn->prepare("SELECT password_hash FROM users WHERE user_name = ?");
 
         $stmt->bind_param("s", $username);
 
@@ -107,7 +107,7 @@ class DbHandler {
      * @return boolean
      */
     private function doesUserExists($username, $email) {
-        $stmt = $this->conn->prepare("SELECT id from users WHERE email = ? OR username = ?");
+        $stmt = $this->conn->prepare("SELECT id from users WHERE email = ? OR user_name = ?");
         $stmt->bind_param("ss", $email, $username);
         $stmt->execute();
         $stmt->store_result();
@@ -122,10 +122,31 @@ class DbHandler {
      * @return Object User object
      */
     public function getUserByEmail($email) {
-        $stmt = $this->conn->prepare("SELECT name, email, api_key, status, created_at FROM users WHERE email = ?");
+        $stmt = $this->conn->prepare("SELECT user_name, email, api_key FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         if ($stmt->execute()) {
             $user = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            return $user;
+        } else {
+            return NULL;
+        }
+    }
+
+    /**
+     * Fetching user by username
+     * @param String $username Username
+     * @return Object User object
+     */
+    public function getUserByUsername($username) {
+        $stmt = $this->conn->prepare("SELECT user_name, email, api_key FROM users WHERE user_name = ?");
+        $stmt->bind_param("s", $username);
+        if ($stmt->execute()) {
+            $stmt->bind_result($username, $email, $api_key);
+            $stmt->fetch();
+            $user["email"] = $email;
+            $user["user_name"] = $username;
+            $user["api_key"] = $api_key;
             $stmt->close();
             return $user;
         } else {
@@ -283,6 +304,8 @@ class DbHandler {
         $stmt->close();
         return $num_affected_rows > 0;
     }
+
+
 
 
 } 
