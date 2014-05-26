@@ -125,7 +125,11 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT user_name, email, api_key FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         if ($stmt->execute()) {
-            $user = $stmt->get_result()->fetch_assoc();
+            $stmt->bind_result($username, $email, $api_key);
+            $stmt->fetch();
+            $user["email"] = $email;
+            $user["user_name"] = $username;
+            $user["api_key"] = $api_key;
             $stmt->close();
             return $user;
         } else {
@@ -163,7 +167,9 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT api_key FROM users WHERE id = ?");
         $stmt->bind_param("i", $user_id);
         if ($stmt->execute()) {
-            $api_key = $stmt->get_result()->fetch_assoc();
+            $stmt->bind_result($key);
+            $stmt->fetch();
+            $api_key["api_key"] = $key;
             $stmt->close();
             return $api_key;
         } else {
@@ -180,7 +186,9 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT id FROM users WHERE api_key = ?");
         $stmt->bind_param("s", $api_key);
         if ($stmt->execute()) {
-            $user_id = $stmt->get_result()->fetch_assoc();
+            $stmt->bind_result($id);
+            $stmt->fetch();
+            $user_id["id"] = $id;
             $stmt->close();
             return $user_id;
         } else {
