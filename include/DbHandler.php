@@ -229,7 +229,7 @@ class DbHandler {
      * @return String
      */
     public function assignSetToUser($user_id, $set_id) {
-        $stmt = $this->conn->prepare("INSERT INTO user_sets(user_id, set_id) values(?, ?)");
+        $stmt = $this->conn->prepare("INSERT INTO user_sets(user_id, card_set_id) values(?, ?)");
         $stmt->bind_param("ii", $user_id, $set_id);
         $result = $stmt->execute();
         $stmt->close();
@@ -243,11 +243,26 @@ class DbHandler {
      */
 
     public function getAllUserAssignedSets($user_id){
-        $stmt = $this->conn->prepare("SELECT cs.* FROM card_set cs, user_sets us WHERE cs.id = us.card_set_id AND us.user_id = ?");
+        $stmt = $this->conn->prepare("SELECT cs.* FROM card_set cs, user_sets us WHERE cs.id = us.card_set_id AND us.user_id = ? ORDER BY cs.id DESC");
         $stmt->bind_param("i", $user_id);
-        $result = $stmt->execute();
+        $stmt->execute();
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["id"] = $id;
+            $tmp["set_name"] = $set_name;
+            $tmp["image_url"] = $image_url;
+            $tmp["set_icon"] = $set_icon;
+            $tmp["release_date"] = $release_date;
+            $tmp["is_legal"] = (bool) $is_legal;
+            $tmp["series_id"] = $series_id;
+            array_push($response, $tmp);
+        }
         $stmt->close();
-        return $result;
+        return $response;
     }
 
     /**
@@ -277,9 +292,21 @@ class DbHandler {
     public function getAllUserCards($user_id){
         $stmt = $this->conn->prepare("SELECT c.*, uc.quantity FROM cards c, user_cards uc WHERE c.id = uc.card_id AND uc.user_id = ?");
         $stmt->bind_param("i", $user_id);
-        $result = $stmt->execute();
+        $stmt->execute();
+        $result = $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+
+        $response = array();
+
+        while($result->fetch()){
+            $tmp = array();
+            $tmp["id"] = $id;
+            $tmp["set_name"] = $set_name;
+            $tmp["image_url"] = $image_url;
+            $tmp["set_icon"] = $set_icon;
+            array_push($response["tasks"], $tmp);
+        }
         $stmt->close();
-        return $result;
+        return $response;
     }
 
     /**

@@ -69,11 +69,45 @@ function echoResponse($status_code, $response) {
     //add timestamp to header
     $app->response->headers->set('timestamp', time());
 
-
     // setting response content type to json
     $app->contentType('application/json');
 
     echo json_encode($response);
+}
+
+function authenticate(\Slim\Route $route) {
+    // Getting request headers
+    $headers = apache_request_headers();
+    $response = array();
+    $app = \Slim\Slim::getInstance();
+
+    // Verifying Authorization Header
+    if (isset($headers['Authorization'])) {
+        $db = new DbHandler();
+
+        // get the api key
+        $api_key = $headers['Authorization'];
+        // validating api key
+        if (!$db->isValidApiKey($api_key)) {
+            // api key is not present in users table
+            $response["error"] = true;
+            $response["message"] = "Access Denied. Invalid API key";
+            echoResponse(401, $response);
+            $app->stop();
+        } else {
+            global $user_id;
+            // get user primary key id
+            $user = $db->getUserId($api_key);
+            if ($user != NULL)
+                $user_id = $user["id"];
+        }
+    } else {
+        // api key is missing in header
+        $response["error"] = true;
+        $response["message"] = "Authentication is required: api_key missing";
+        echoResponse(401, $response);
+        $app->stop();
+    }
 }
 
 //-----------------------------------------//
@@ -167,6 +201,78 @@ $app->post('/login', function() use ($app) {
         $response['message'] = 'Login failed. Incorrect credentials';
     }
 
+    echoResponse(200, $response);
+});
+
+//-----------------------------------------//
+//AUTH CALLS
+
+/**
+ * Assigning new Set to user
+ * method POST
+ * params - set
+ * url - /user/set
+ */
+$app->post('/user/set', 'authenticate', function() use ($app) {
+    // check for required params
+    verifyRequiredParams(array('set_id'));
+
+    $response = array();
+    $set = $app->request->post('set_id');
+
+    global $user_id;
+    $db = new DbHandler();
+
+    // creating new user set
+    $set_created = $db->assignSetToUser($user_id, $set);
+
+    if ($set_created) {
+        $response["error"] = false;
+        $response["message"] = "Set added successfully";
+    } else {
+        $response["error"] = true;
+        $response["message"] = "Failed to assign set. Please try again";
+    }
+    echoResponse(201, $response);
+});
+
+/**
+ * Get all user sets
+ * method GET
+ * params - set
+ * url - /user/set
+ */
+$app->get('/user/set', 'authenticate', function(){
+    global $user_id;
+    $response = array();
+    $db = new DbHandler();
+
+    $result = $db->getAllUserAssignedSets($user_id);
+    $response["error"] = false;
+    $response["sets"] = $result;
+
+    echoResponse(200, $response);
+});
+
+$app->delete('/user/set', 'authenticate', function() use ($app){
+
+    verifyRequiredParams(array('set_id'));
+
+    $response = array();
+    $set = $app->request->delete('set_id');
+
+    global $user_id;
+    $db = new DbHandler();
+
+    $set_deleted = $db->deleteUserAssignedSet($user_id, $set);
+
+    if ($set_deleted) {
+        $response["error"] = false;
+        $response["message"] = "Set removed successfully";
+    } else {
+        $response["error"] = true;
+        $response["message"] = "Failed to remove set. Please try again";
+    }
     echoResponse(200, $response);
 });
 
