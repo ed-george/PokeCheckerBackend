@@ -220,6 +220,85 @@ class DbHandler {
         return md5(uniqid(rand(), true));
     }
 
+
+    /* ------------- `sets` table methods ------------------ */
+
+    /**
+     * Get all sets
+     * @return String
+     */
+
+    public function getAllSets(){
+        $stmt = $this->conn->prepare("SELECT * FROM card_set cs ORDER BY cs.id DESC");
+
+        $stmt->execute();
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["id"] = $id;
+            $tmp["set_name"] = $set_name;
+            $tmp["image_url"] = $image_url;
+            $tmp["set_icon"] = $set_icon;
+            $tmp["release_date"] = $release_date;
+            $tmp["is_legal"] = (bool) $is_legal;
+            $tmp["series_id"] = $series_id;
+            array_push($response, $tmp);
+        }
+        $stmt->close();
+        return $response;
+    }
+
+    /* ------------- `series` table methods ------------------ */
+
+    /**
+     * Get all series
+     * @return String
+     */
+
+    public function getAllSeries(){
+        $stmt = $this->conn->prepare("SELECT * FROM card_series cs ORDER BY cs.id DESC");
+
+        $stmt->execute();
+        $stmt->bind_result($id, $series_name);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["id"] = $id;
+            $tmp["series_name"] = $series_name;
+            array_push($response, $tmp);
+        }
+        $stmt->close();
+        return $response;
+    }
+
+    public function getAllSetsFromSeries($series_id){
+        $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ?");
+        $stmt->bind_param("i", $series_id);
+        $stmt->execute();
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["id"] = $id;
+            $tmp["set_name"] = $set_name;
+            $tmp["image_url"] = $image_url;
+            $tmp["set_icon"] = $set_icon;
+            $tmp["release_date"] = $release_date;
+            $tmp["is_legal"] = (bool) $is_legal;
+            array_push($response, $tmp);
+        }
+        $stmt->close();
+        return $response;
+    }
+
+
     /* ------------- `user_sets` table methods ------------------ */
 
     /**

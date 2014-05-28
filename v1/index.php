@@ -120,7 +120,7 @@ function authenticate(\Slim\Route $route) {
  */
 
 $app->get('/isAlive', function(){
-   echo "true";
+    echo "true";
 });
 
 //-----------------------------------------//
@@ -205,6 +205,59 @@ $app->post('/login', function() use ($app) {
 });
 
 //-----------------------------------------//
+//PUBLIC CALLS
+
+/**
+ * Get all sets
+ * method GET
+ * url - /sets
+ */
+$app->get('/sets', function(){
+    $response = array();
+    $db = new DbHandler();
+
+    $result = $db->getAllSets();
+    $response["error"] = false;
+    $response["sets"] = $result;
+
+    echoResponse(200, $response);
+});
+
+/**
+ * Get all series
+ * method GET
+ * url - /series
+ */
+$app->get('/series', function(){
+    $response = array();
+    $db = new DbHandler();
+
+    $result = $db->getAllSeries();
+    $response["error"] = false;
+    $response["series"] = $result;
+
+    echoResponse(200, $response);
+});
+
+/**
+ * Get all sets from series id
+ * method GET
+ * url - /series
+ */
+$app->get('/sets/series/:id', function($series_id){
+    $response = array();
+    $db = new DbHandler();
+
+    $result = $db->getAllSetsFromSeries($series_id);
+    $response["error"] = false;
+    $response["series_id"] = (int) $series_id;
+    $response["sets"] = $result;
+
+    echoResponse(200, $response);
+});
+
+
+//-----------------------------------------//
 //AUTH CALLS
 
 /**
@@ -254,17 +307,21 @@ $app->get('/user/set', 'authenticate', function(){
     echoResponse(200, $response);
 });
 
-$app->delete('/user/set', 'authenticate', function() use ($app){
 
-    verifyRequiredParams(array('set_id'));
+/**
+ * Delete user sets
+ * method DELETE
+ * params - id
+ * url - /user/set/:id
+ */
+$app->delete('/user/set/:id', 'authenticate', function($set_id) use ($app){
 
     $response = array();
-    $set = $app->request->delete('set_id');
 
     global $user_id;
     $db = new DbHandler();
 
-    $set_deleted = $db->deleteUserAssignedSet($user_id, $set);
+    $set_deleted = $db->deleteUserAssignedSet($user_id, $set_id);
 
     if ($set_deleted) {
         $response["error"] = false;
