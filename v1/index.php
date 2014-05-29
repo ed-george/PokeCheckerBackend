@@ -256,6 +256,23 @@ $app->get('/sets/series/:id', function($series_id){
     echoResponse(200, $response);
 });
 
+/*
+ * Get all cards from a set
+ * method GET
+ * url - /sets/:id/cards
+ */
+$app->get('/sets/:id/cards', function ($set_id){
+    $response = array();
+    $db = new DbHandler();
+
+
+    $set = $db->getSet($set_id);
+    $result = $db->getCardsFromSet($set_id);
+    $response["error"] = false;
+    $response["set"] = $set;
+    $response["cards"] = $result;
+    echoResponse(200, $response);
+});
 
 //-----------------------------------------//
 //AUTH CALLS

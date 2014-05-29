@@ -220,6 +220,37 @@ class DbHandler {
         return md5(uniqid(rand(), true));
     }
 
+    /* ------------- `cards` table methods ------------------ */
+
+    /**
+     * Get all cards from set
+     * @param int set id
+     * @return String
+     */
+
+    public function getCardsFromSet($set_id){
+        $stmt = $this->conn->prepare("SELECT * FROM cards WHERE card_set_id = ? LIMIT 78");
+        $stmt->bind_param("i", $set_id);
+        $stmt->execute();
+        $stmt->bind_result($id, $title, $scan_url, $card_type_id, $card_rarity_id, $card_set_id, $type_id, $card_number, $set_raw, $card_type_raw, $pokemon_type_raw, $rarity_raw);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["card_id"] = $id;
+            $tmp["title"] = utf8_encode($title);
+            $tmp["scan_url"] = $scan_url;
+            $tmp["card_number"] = (int) $card_number;
+            $tmp["card_type"] = utf8_encode($card_type_raw);
+            $tmp["pokemon_type"] = $pokemon_type_raw;
+            $tmp["rarity"] = $rarity_raw;
+            array_push($response, $tmp);
+        }
+
+        $stmt->close();
+        return $response;
+    }
 
     /* ------------- `sets` table methods ------------------ */
 
@@ -247,6 +278,27 @@ class DbHandler {
             $tmp["series_id"] = $series_id;
             array_push($response, $tmp);
         }
+        $stmt->close();
+        return $response;
+    }
+
+    public function getSet($set_id){
+        $stmt = $this->conn->prepare("SELECT * FROM card_set cs WHERE id = ?");
+        $stmt->bind_param("i", $set_id);
+        $stmt->execute();
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+
+        $stmt->fetch();
+
+        $response["id"] = $id;
+        $response["set_name"] = $set_name;
+        $response["image_url"] = $image_url;
+        $response["set_icon"] = $set_icon;
+        $response["release_date"] = $release_date;
+        $response["is_legal"] = (bool) $is_legal;
+        $response["series_id"] = $series_id;
+
+
         $stmt->close();
         return $response;
     }
