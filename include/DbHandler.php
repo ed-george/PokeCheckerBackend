@@ -225,11 +225,11 @@ class DbHandler {
     /**
      * Get all cards from set
      * @param int set id
-     * @return String
+     * @return array
      */
 
     public function getCardsFromSet($set_id){
-        $stmt = $this->conn->prepare("SELECT * FROM cards WHERE card_set_id = ? LIMIT 78");
+        $stmt = $this->conn->prepare("SELECT * FROM cards WHERE card_set_id = ?");
         $stmt->bind_param("i", $set_id);
         $stmt->execute();
         $stmt->bind_result($id, $title, $scan_url, $card_type_id, $card_rarity_id, $card_set_id, $type_id, $card_number, $set_raw, $card_type_raw, $pokemon_type_raw, $rarity_raw);
