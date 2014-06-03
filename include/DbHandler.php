@@ -411,6 +411,15 @@ class DbHandler {
         return $num_affected_rows > 0;
     }
 
+    public function isUserAssignedToSet($user_id, $set_id){
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM user_sets us WHERE us.user_id = ? AND us.card_set_id = ? LIMIT 1");
+        $stmt->bind_param("ii", $user_id, $set_id);
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        return $count > 0;
+    }
 
     /* ------------- `user_cards` table methods ------------------ */
 
@@ -434,8 +443,34 @@ class DbHandler {
             $tmp["set_name"] = $set_name;
             $tmp["image_url"] = $image_url;
             $tmp["set_icon"] = $set_icon;
-            array_push($response["tasks"], $tmp);
+            array_push($response["cards"], $tmp);
         }
+        $stmt->close();
+        return $response;
+    }
+
+    public function getUserCardsFromSet($user_id, $set_id){
+
+        $stmt = $this->conn->prepare("SELECT c.*, uc.quantity FROM user_cards uc, cards c WHERE uc.user_id = ? AND uc.card_id = c.id AND c.card_set_id = ?");
+        $stmt->bind_param("ii", $user_id, $set_id);
+        $stmt->execute();
+        $stmt->bind_result($id, $title, $scan_url, $card_type_id, $card_rarity_id, $card_set_id, $type_id, $card_number, $set_raw, $card_type_raw, $pokemon_type_raw, $rarity_raw, $quantity);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["card_id"] = $id;
+            $tmp["title"] = utf8_encode($title);
+            $tmp["scan_url"] = $scan_url;
+            $tmp["card_number"] = (int) $card_number;
+            $tmp["card_type"] = utf8_encode($card_type_raw);
+            $tmp["pokemon_type"] = $pokemon_type_raw;
+            $tmp["rarity"] = $rarity_raw;
+            $tmp["quantity"] = (int) $quantity;
+            array_push($response, $tmp);
+        }
+
         $stmt->close();
         return $response;
     }

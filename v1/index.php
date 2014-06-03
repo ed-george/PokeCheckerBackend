@@ -270,6 +270,7 @@ $app->get('/sets/:id/cards', function ($set_id){
     $result = $db->getCardsFromSet($set_id);
     $response["error"] = false;
     $response["set"] = $set;
+    $response["count"] = count($result);
     $response["cards"] = $result;
     echoResponse(200, $response);
 });
@@ -347,6 +348,36 @@ $app->delete('/user/set/:id', 'authenticate', function($set_id) use ($app){
         $response["error"] = true;
         $response["message"] = "Failed to remove set. Please try again";
     }
+    echoResponse(200, $response);
+});
+
+/**
+ * Get user cards from sets
+ * method GET
+ * params - id
+ * url - /user/set/:id/cards
+ */
+$app->get('/user/set/:id/cards', 'authenticate', function($set_id) use ($app){
+
+    $response = array();
+
+    global $user_id;
+    $db = new DbHandler();
+    $isUserAssignedSet = $db->isUserAssignedToSet($user_id, $set_id);
+    if($isUserAssignedSet){
+
+        $cards = $db->getUserCardsFromSet($user_id, $set_id);
+        $set = $db->getSet($set_id);
+        $response["error"] = false;
+        $response["set"] = $set;
+        $response["count"] = count($cards);
+        $response["cards"] = $cards;
+
+    }else{
+        $response["error"] = true;
+        $response["message"] = "Sorry, you aren't currently subscribed to this set.";
+    }
+
     echoResponse(200, $response);
 });
 
