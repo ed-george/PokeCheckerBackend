@@ -143,6 +143,27 @@ $app->post('/register', function() use ($app) {
     $email = $app->request->post('email');
     $password = $app->request->post('password');
 
+    if (preg_match('/\s/',$name)){
+        $response["error"] = true;
+        $response["message"] = "Your username must not contain any spaces.";
+        echoResponse(200, $response);
+        return;
+    }
+
+    if(strlen($name) < 2){
+        $response["error"] = true;
+        $response["message"] = "Your username should be longer than 2 characters!";
+        echoResponse(200, $response);
+        return;
+    }
+
+    if(strlen($password) < 8){
+        $response["error"] = true;
+        $response["message"] = "Your password should be longer than 8 characters!";
+        echoResponse(200, $response);
+        return;
+    }
+
     // validating email address
     validateEmail($email);
 
