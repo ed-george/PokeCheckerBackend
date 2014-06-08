@@ -7,6 +7,10 @@
  * Copyright PokéChecker 2014
  */
 
+define('DEBUG_MODE', true);
+
+define('HOST', 'http://localhost:8888');
+
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', 'root');
 define('DB_HOST', 'localhost');

@@ -220,6 +220,18 @@ class DbHandler {
         return md5(uniqid(rand(), true));
     }
 
+    /* ----------------- helper functions ------------------- */
+
+    private function getScanURL($scan_url){
+
+        if($scan_url == null){
+            return null;
+        }
+
+        $url = HOST . $scan_url;
+        return $url;
+    }
+
     /* ------------- `cards` table methods ------------------ */
 
     /**
@@ -240,7 +252,7 @@ class DbHandler {
             $tmp = array();
             $tmp["card_id"] = $id;
             $tmp["title"] = utf8_encode($title);
-            $tmp["scan_url"] = $scan_url;
+            $tmp["scan_url"] = $this->getScanURL($scan_url);
             $tmp["card_number"] = (int) $card_number;
             $tmp["card_type"] = utf8_encode($card_type_raw);
             $tmp["pokemon_type"] = $pokemon_type_raw;
@@ -461,12 +473,15 @@ class DbHandler {
         while($result = $stmt->fetch()){
             $tmp = array();
             $tmp["card_id"] = $id;
-            $tmp["title"] = utf8_encode($title);
-            $tmp["scan_url"] = $scan_url;
-            $tmp["card_number"] = (int) $card_number;
-            $tmp["card_type"] = utf8_encode($card_type_raw);
-            $tmp["pokemon_type"] = $pokemon_type_raw;
-            $tmp["rarity"] = $rarity_raw;
+            if(DEBUG_MODE){
+                //TODO: remove this line
+                $tmp["title"] = utf8_encode($title);
+                $tmp["scan_url"] = $this->getScanURL($scan_url);
+                $tmp["card_number"] = (int) $card_number;
+                $tmp["card_type"] = utf8_encode($card_type_raw);
+                $tmp["pokemon_type"] = $pokemon_type_raw;
+                $tmp["rarity"] = $rarity_raw;
+            }
             $tmp["quantity"] = (int) $quantity;
             array_push($response, $tmp);
         }
