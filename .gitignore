@@ -5,3 +5,7 @@
 # Webstorm IDE
 .idea/
 
+# PokeLogs
+
+poke_logs/
+
