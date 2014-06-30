@@ -4,12 +4,16 @@ require_once '../include/DbHandler.php';
 require_once '../include/PassHash.php';
 require '../libs/Slim/Slim/Slim.php';
 
+include '../include/Logger.php';
+include '../include/LogLevel.php';
+
 \Slim\Slim::registerAutoloader();
 
 $app = new \Slim\Slim();
-
+$log = new \Pokechecker\Logger('../poke_logs', Pokechecker\LogLevel::DEBUG, true);
 // User id from db - Global Variable
 $user_id = NULL;
+
 
 /**
  * Verifying required params posted or not
@@ -81,17 +85,25 @@ function authenticate(\Slim\Route $route) {
     $response = array();
     $app = \Slim\Slim::getInstance();
 
+    global $log;
+
+    foreach ($headers as $header => $value) {
+        $log->debug($header . " " . $value);
+    }
+
+
     // Verifying Authorization Header
-    if (isset($headers['Authorization'])) {
+    if (isset($headers[AUTHORIZATION_HEADER])) {
         $db = new DbHandler();
 
         // get the api key
-        $api_key = $headers['Authorization'];
+        $api_key = $headers[AUTHORIZATION_HEADER];
         // validating api key
         if (!$db->isValidApiKey($api_key)) {
             // api key is not present in users table
             $response["error"] = true;
             $response["message"] = "Access Denied. Invalid API key";
+            $log->warning("Attempted unauthorized access of " . $route->getPattern() . " from IP " . get_client_ip());
             echoResponse(401, $response);
             $app->stop();
         } else {
@@ -288,11 +300,16 @@ $app->get('/sets/:id/cards', function ($set_id){
 
 
     $set = $db->getSet($set_id);
-    $result = $db->getCardsFromSet($set_id);
-    $response["error"] = false;
-    $response["set"] = $set;
-    $response["count"] = count($result);
-    $response["cards"] = $result;
+    if($set != null){
+        $result = $db->getCardsFromSet($set_id);
+        $response["error"] = false;
+        $response["set"] = $set;
+        $response["count"] = count($result);
+        $response["cards"] = $result;
+    }else{
+        $response["error"] = true;
+        $response["message"] = "Sorry that set does not exist.";
+    }
     echoResponse(200, $response);
 });
 
@@ -398,7 +415,6 @@ $app->get('/user/set/:id/cards', 'authenticate', function($set_id) use ($app){
         $response["error"] = true;
         $response["message"] = "Sorry, you aren't currently subscribed to this set.";
     }
-
     echoResponse(200, $response);
 });
 
