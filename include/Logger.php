@@ -203,7 +203,8 @@ class Logger
         if (! empty($context)) {
             $message .= PHP_EOL.$this->indent($this->contextToString($context));
         }
-        return "[{$this->getTimestamp()}] $level {$message}".PHP_EOL;
+        $time = sprintf($this->colorFormats['green'],"[{$this->getTimestamp()}]");
+        return "{$time} $level {$message}".PHP_EOL;
     }
 
     private function colorize($level){
