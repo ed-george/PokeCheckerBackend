@@ -302,6 +302,12 @@ class DbHandler {
 
         $stmt->fetch();
 
+        //TODO: Fix this hack
+        if($set_name == null){
+            $stmt->close();
+            return null;
+        }
+
         $response["id"] = $id;
         $response["set_name"] = $set_name;
         $response["image_url"] = $image_url;
@@ -520,6 +526,11 @@ class DbHandler {
         $stmt->close();
         return $num_affected_rows > 0;
     }
+
+//    public static function getLog(){
+//        $log = new \Pokechecker\Logger('../poke_logs', Pokechecker\LogLevel::INFO, true);
+//        return self::$log;
+//    }
 
 
 
