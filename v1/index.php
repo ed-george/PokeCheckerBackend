@@ -80,17 +80,15 @@ function echoResponse($status_code, $response) {
 }
 
 function authenticate(\Slim\Route $route) {
+
+    include_once '../include/config.php';
+
     // Getting request headers
     $headers = apache_request_headers();
     $response = array();
     $app = \Slim\Slim::getInstance();
 
     global $log;
-
-    foreach ($headers as $header => $value) {
-        $log->debug($header . " " . $value);
-    }
-
 
     // Verifying Authorization Header
     if (isset($headers[AUTHORIZATION_HEADER])) {
@@ -116,7 +114,7 @@ function authenticate(\Slim\Route $route) {
     } else {
         // api key is missing in header
         $response["error"] = true;
-        $response["message"] = "Authentication is required: api_key missing";
+        $response["message"] = "Authentication is required: " . AUTHORIZATION_HEADER . " missing";
         echoResponse(401, $response);
         $app->stop();
     }
@@ -289,7 +287,7 @@ $app->get('/sets/series/:id', function($series_id){
     echoResponse(200, $response);
 });
 
-/*
+/**
  * Get all cards from a set
  * method GET
  * url - /sets/:id/cards
