@@ -275,7 +275,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT * FROM card_set cs ORDER BY cs.id DESC");
 
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
 
         $response = array();
 
@@ -287,6 +287,7 @@ class DbHandler {
             $tmp["set_icon"] = $set_icon;
             $tmp["release_date"] = $release_date;
             $tmp["is_legal"] = (bool) $is_legal;
+            $tmp["cards_in_set"] = (int) $cards_in_set;
             $tmp["series_id"] = $series_id;
             array_push($response, $tmp);
         }
@@ -298,7 +299,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT * FROM card_set cs WHERE id = ?");
         $stmt->bind_param("i", $set_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
 
         $stmt->fetch();
 
@@ -314,8 +315,8 @@ class DbHandler {
         $response["set_icon"] = $set_icon;
         $response["release_date"] = $release_date;
         $response["is_legal"] = (bool) $is_legal;
+        $response["cards_in_set"] = (int) $cards_in_set;
         $response["series_id"] = $series_id;
-
 
         $stmt->close();
         return $response;
@@ -395,7 +396,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT cs.* FROM card_set cs, user_sets us WHERE cs.id = us.card_set_id AND us.user_id = ? ORDER BY cs.id DESC");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
 
         $response = array();
 
@@ -407,6 +408,7 @@ class DbHandler {
             $tmp["set_icon"] = $set_icon;
             $tmp["release_date"] = $release_date;
             $tmp["is_legal"] = (bool) $is_legal;
+            $tmp["cards_in_set"] = (int) $cards_in_set;
             $tmp["series_id"] = $series_id;
             array_push($response, $tmp);
         }
@@ -459,8 +461,6 @@ class DbHandler {
             $tmp = array();
             $tmp["id"] = $id;
             $tmp["set_name"] = $set_name;
-            $tmp["image_url"] = $image_url;
-            $tmp["set_icon"] = $set_icon;
             array_push($response["cards"], $tmp);
         }
         $stmt->close();
