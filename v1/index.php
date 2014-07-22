@@ -149,8 +149,8 @@ $app->post('/register', function() use ($app) {
     $response = array();
 
     // reading post params
-    $name = $app->request->post('username');
-    $email = $app->request->post('email');
+    $name = strtolower($app->request->post('username'));
+    $email = strtolower($app->request->post('email'));
     $password = $app->request->post('password');
 
     if (preg_match('/\s/',$name)){
@@ -160,9 +160,9 @@ $app->post('/register', function() use ($app) {
         return;
     }
 
-    if(strlen($name) < 2){
+    if(strlen($name) < 2 || strlen($name) > 32){
         $response["error"] = true;
-        $response["message"] = "Your username should be longer than 2 characters!";
+        $response["message"] = "Your username should be between 2 and 32 characters !";
         echoResponse(200, $response);
         return;
     }
@@ -174,17 +174,20 @@ $app->post('/register', function() use ($app) {
         return;
     }
 
+    if(strlen($password) > 32){
+        $response["error"] = true;
+        $response["message"] = "Your password should be no longer than 32 characters!";
+        echoResponse(200, $response);
+        return;
+    }
+
     // validating email address
     validateEmail($email);
 
     $db = new DbHandler();
     $res = $db->createUser($name, $email, $password);
 
-    if ($res == CREATED_SUCCESSFULLY) {
-        $response["error"] = false;
-        $response["message"] = "You are successfully registered";
-        echoResponse(201, $response);
-    } else if ($res == CREATE_FAILED) {
+    if ($res == CREATE_FAILED) {
         $response["error"] = true;
         $response["message"] = "Oops! An error occurred while registering";
         echoResponse(400, $response);
@@ -192,7 +195,13 @@ $app->post('/register', function() use ($app) {
         $response["error"] = true;
         $response["message"] = "Sorry, these credentials already existed";
         echoResponse(200, $response);
+    }else{
+        $response["error"] = false;
+        $response["message"] = "You are successfully registered";
+        $response["api_key"] = $res;
+        echoResponse(201, $response);
     }
+
 });
 
 /**
@@ -206,7 +215,7 @@ $app->post('/login', function() use ($app) {
     verifyRequiredParams(array('username', 'password'));
 
     // reading post params
-    $username = $app->request()->post('username');
+    $username = strtolower($app->request()->post('username'));
     $password = $app->request()->post('password');
     $response = array();
 
