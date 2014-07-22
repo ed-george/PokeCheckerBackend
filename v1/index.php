@@ -244,6 +244,29 @@ $app->post('/login', function() use ($app) {
     echoResponse(200, $response);
 });
 
+/**
+ * Verify Account
+ * url - /verify/:verification_code
+ * method - GET
+ */
+$app->get('/verify/:verification_code', function($verification_code) use ($app){
+
+    $db = new DbHandler();
+    $response = array();
+
+    if($db->checkVerification($verification_code)){
+        $response['error'] = false;
+        $response['message'] = "Thank you, your account has been verified.";
+    }else{
+        $response['error'] = true;
+        $response['message'] = "Sorry, we could not verify your email address";
+    }
+
+    echoResponse(200, $response);
+
+});
+
+
 //-----------------------------------------//
 //PUBLIC CALLS
 

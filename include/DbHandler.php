@@ -35,10 +35,11 @@ class DbHandler {
 
             // Generating API key
             $api_key = $this->generateAPIKey();
+            $verification_code = $this->generateAPIKey();
 
             // insert query
-            $stmt = $this->conn->prepare("INSERT INTO users(user_name, email, password_hash, api_key) values(?, ?, ?, ?)");
-            $stmt->bind_param("ssss", $username, $email, $password_hash, $api_key);
+            $stmt = $this->conn->prepare("INSERT INTO users(user_name, email, password_hash, api_key, verified, verification_code) values(?, ?, ?, ?, 0, ?)");
+            $stmt->bind_param("sssss", $username, $email, $password_hash, $api_key, $verification_code);
 
             $result = $stmt->execute();
 
@@ -56,6 +57,38 @@ class DbHandler {
             // User with same email/username already existed in the db
             return ALREADY_EXISTED;
         }
+
+    }
+
+    /**
+     * Update accounts as being verified
+     * @param $verification_code
+     * @return bool
+     */
+    public function checkVerification($verification_code){
+        $stmt = $this->conn->prepare("SELECT id from users WHERE verification_code = ? AND verified = 0");
+        $stmt->bind_param("s", $verification_code);
+        $stmt->execute();
+        $stmt->store_result();
+        $num_rows= $stmt->num_rows;
+
+        if($num_rows > 0){
+
+            $stmt->bind_result($id);
+
+            while($stmt->fetch()){
+                $new_stmt = $this->conn->prepare("UPDATE users SET verified = 1  WHERE id = ?;");
+                $new_stmt->bind_param("s", $id);
+                $new_stmt->execute();
+                $new_stmt->close();
+            }
+
+            $stmt->close();
+            return true;
+        }
+
+        $stmt->close();
+        return false;
 
     }
 
