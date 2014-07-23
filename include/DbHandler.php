@@ -27,6 +27,7 @@ class DbHandler {
      */
     public function createUser($username, $email, $password) {
         require_once 'PassHash.php';
+        require_once 'Emailer.php';
 
         // First check if user already existed in db
         if (!$this->doesUserExists($username, $email)) {
@@ -40,6 +41,9 @@ class DbHandler {
             // insert query
             $stmt = $this->conn->prepare("INSERT INTO users(user_name, email, password_hash, api_key, verified, verification_code) values(?, ?, ?, ?, 0, ?)");
             $stmt->bind_param("sssss", $username, $email, $password_hash, $api_key, $verification_code);
+
+            $emailer = new Emailer();
+            $emailer->sendVerifyEmail($email, $username, $verification_code);
 
             $result = $stmt->execute();
 
