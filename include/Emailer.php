@@ -9,6 +9,7 @@
 
 class Emailer{
 
+
     public function getEmailFromTemplate($variables, $template_location){
 
         $template = file_get_contents($template_location);
@@ -29,7 +30,7 @@ class Emailer{
         $variables = array();
 
         $variables['name'] = $username;
-        $variables['url'] = HOST;
+        $variables['url'] = HOST . "/verify/";
         $variables['verification'] = $verification;
 
         $template = "../mail_templates/welcome.html";
@@ -40,13 +41,19 @@ class Emailer{
     }
 
     private function mailUser($email, $subject, $template, $variables){
+
+        $log = new \Pokechecker\Logger('../poke_logs', Pokechecker\LogLevel::DEBUG, true);
+
         $to = $email;
-        $message = $this->getEmailFromTemplate($template, $variables);
+        $message = $this->getEmailFromTemplate($variables, $template);
         $from = "no-reply@pokechecker.com";
         $headers = "From: ". $from . "\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=ISO-8859-1;\r\n";
+        $headers .= "Content-Type: text/html; charset=utf-8\r\n";
         mail($to,$subject,$message,$headers);
+
+        $log->info("Sent mail to " . $email . " - " . $subject);
+
     }
 
 }
