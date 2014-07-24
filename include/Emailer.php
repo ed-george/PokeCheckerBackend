@@ -30,12 +30,12 @@ class Emailer{
         $variables = array();
 
         $variables['name'] = $username;
-        $variables['url'] = HOST . "/verify/";
+        $variables['url'] = HOST . "v1/verify";
         $variables['verification'] = $verification;
 
         $template = "../mail_templates/welcome.html";
 
-        $this->mailUser($email, "Verify your Pokéchecker account", $template, $variables);
+        $this->mailUser($email, "Verify your Pokechecker account", $template, $variables);
 
 
     }
