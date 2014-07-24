@@ -34,18 +34,18 @@ class Emailer{
 
         $template = "../mail_templates/welcome.html";
 
-        $this->mailUser($email, "Verify your Pokéchecker account", $template);
+        $this->mailUser($email, "Verify your Pokéchecker account", $template, $variables);
 
 
     }
 
-    private function mailUser($email, $subject, $content){
+    private function mailUser($email, $subject, $template, $variables){
         $to = $email;
-        $message = $content;
+        $message = $this->getEmailFromTemplate($template, $variables);
         $from = "no-reply@pokechecker.com";
         $headers = "From: ". $from . "\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1;\r\n";
         mail($to,$subject,$message,$headers);
     }
 
