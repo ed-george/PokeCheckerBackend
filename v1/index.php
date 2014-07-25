@@ -267,6 +267,21 @@ $app->get('/verify/:verification_code', function($verification_code) use ($app){
 });
 
 
+$app->get('/web/verify/:verification_code', function($verification_code) use ($app){
+    include_once "../include/Emailer.php";
+
+    $db = new DbHandler();
+    $vars = array();
+    $vars["url"] = "app release url";
+    if($db->checkVerification($verification_code)){
+     echo Emailer::getEmailFromTemplate($vars ,"../mail_templates/verification_accepted.html");
+    }else{
+        echo "You accidentally the whole Pok&eacute;checker.";
+    }
+
+});
+
+
 //-----------------------------------------//
 //PUBLIC CALLS
 

@@ -10,7 +10,7 @@
 class Emailer{
 
 
-    public function getEmailFromTemplate($variables, $template_location){
+    public static function getEmailFromTemplate($variables, $template_location){
 
         $template = file_get_contents($template_location);
 
@@ -30,7 +30,7 @@ class Emailer{
         $variables = array();
 
         $variables['name'] = $username;
-        $variables['url'] = HOST . "v1/verify";
+        $variables['url'] = HOST . "/v1/web/verify";
         $variables['verification'] = $verification;
 
         $template = "../mail_templates/welcome.html";
