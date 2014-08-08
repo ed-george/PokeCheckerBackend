@@ -153,20 +153,34 @@ class DbHandler {
         return $num_rows > 0;
     }
 
+    public function updateUser($user_id, $firstname, $lastname, $iscollector, $istrader){
+        $stmt = $this->conn->prepare("UPDATE users SET firstname = ?, lastname = ?, is_collector = ?, is_trader = ?  WHERE id = ?");
+        $stmt->bind_param("ssssi", $firstname, $lastname, $iscollector, $istrader, $user_id);
+        $stmt->execute();
+        $stmt->store_result();
+        $num_rows = $stmt->num_rows;
+        $stmt->close();
+        return $num_rows > 0;
+    }
+
     /**
      * Fetching user by email
      * @param String $email User email id
      * @return Object User object
      */
     public function getUserByEmail($email) {
-        $stmt = $this->conn->prepare("SELECT user_name, email, api_key FROM users WHERE email = ?");
+        $stmt = $this->conn->prepare("SELECT user_name, firstname, lastname, email, api_key, is_collector, is_trader FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         if ($stmt->execute()) {
-            $stmt->bind_result($username, $email, $api_key);
+            $stmt->bind_result($username, $firstname, $lastname, $email, $api_key, $collector, $trader);
             $stmt->fetch();
             $user["email"] = $email;
+            $user["first_name"] = $firstname;
+            $user["last_name"] = $lastname;
             $user["user_name"] = $username;
             $user["api_key"] = $api_key;
+            $user["is_collector"] = (bool) $collector;
+            $user["is_trader"] = (bool) $trader;
             $stmt->close();
             return $user;
         } else {
@@ -175,19 +189,71 @@ class DbHandler {
     }
 
     /**
+     * Fetching user by email
+     * @param String $email User email id
+     * @return Object User object
+     */
+    public function getUserById($id) {
+        $stmt = $this->conn->prepare("SELECT user_name, firstname, lastname, email, api_key, is_collector, is_trader FROM users WHERE id = ?");
+        $stmt->bind_param("s", $id);
+        if ($stmt->execute()) {
+            $stmt->bind_result($username, $firstname, $lastname, $email, $api_key, $collector, $trader);
+            $stmt->fetch();
+            $user["email"] = $email;
+            $user["first_name"] = $firstname;
+            $user["last_name"] = $lastname;
+            $user["user_name"] = $username;
+            $user["api_key"] = $api_key;
+            $user["is_collector"] = (bool) $collector;
+            $user["is_trader"] = (bool) $trader;
+            $stmt->close();
+            return $user;
+        } else {
+            return NULL;
+        }
+    }
+
+    public function getUserStats($user_id, $limit){
+
+        if($limit <= 0){
+            $this->$limit = 10;
+        }
+
+        $stmt = $this->conn->prepare("SELECT set_raw, COUNT(*) tot FROM user_cards uc JOIN cards c WHERE uc.card_id = c.id AND uc.user_id = ? GROUP BY set_raw ORDER BY tot DESC LIMIT ?");
+        $stmt->bind_param("ii", $user_id, $limit);
+        $stmt->execute();
+        $stmt->bind_result($set_raw, $count);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["set_name"] = $set_raw;
+            $tmp["card_count"] = $count;
+            array_push($response, $tmp);
+        }
+        $stmt->close();
+        return $response;
+    }
+
+    /**
      * Fetching user by username
      * @param String $username Username
      * @return Object User object
      */
     public function getUserByUsername($username) {
-        $stmt = $this->conn->prepare("SELECT user_name, email, api_key FROM users WHERE user_name = ?");
+        $stmt = $this->conn->prepare("SELECT user_name, firstname, lastname, email, api_key, is_collector, is_trader FROM users WHERE user_name = ?");
         $stmt->bind_param("s", $username);
         if ($stmt->execute()) {
-            $stmt->bind_result($username, $email, $api_key);
+            $stmt->bind_result($username, $firstname, $lastname, $email, $api_key, $collector, $trader);
             $stmt->fetch();
             $user["email"] = $email;
+            $user["first_name"] = $firstname;
+            $user["last_name"] = $lastname;
             $user["user_name"] = $username;
             $user["api_key"] = $api_key;
+            $user["is_collector"] = (bool) $collector;
+            $user["is_trader"] = (bool) $trader;
             $stmt->close();
             return $user;
         } else {

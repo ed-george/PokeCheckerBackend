@@ -228,8 +228,13 @@ $app->post('/login', function() use ($app) {
         if ($user != NULL) {
             $response["error"] = false;
             $response['user_name'] = $user['user_name'];
+            $response['first_name'] = $user['first_name'];
+            $response['last_name'] = $user['last_name'];
             $response['email'] = $user['email'];
             $response['api_key'] = $user['api_key'];
+            $response['is_collector'] = $user['is_collector'];
+            $response['is_trader'] = $user['is_trader'];
+
         } else {
             // unknown error occurred
             $response['error'] = true;
@@ -239,6 +244,55 @@ $app->post('/login', function() use ($app) {
         // user credentials are wrong
         $response['error'] = true;
         $response['message'] = 'Login failed. Incorrect credentials';
+    }
+
+    echoResponse(200, $response);
+});
+
+/**
+ * Update user
+ * method PUT
+ * params
+ * url - /user
+ */
+
+//FIXME: Should be PUT login
+
+$app->post('/user', 'authenticate', function() use ($app) {
+    // check for required params
+    verifyRequiredParams(array('first_name', 'last_name', 'is_collector', 'is_trader'));
+
+    $response = array();
+    $first_name = $app->request->put('first_name');
+    $last_name = $app->request->put('last_name');
+    //TODO: Clean this up
+    $is_collector = $app->request->put('is_collector') === 'true';
+    $is_trader = $app->request->put('is_trader') === 'true';
+    $is_collector_i = (int) $is_collector;
+    $is_trader_i = (int) $is_trader;
+
+    global $user_id;
+    $db = new DbHandler();
+
+    $user_updated = $db->updateUser($user_id, $first_name, $last_name,$is_collector_i,$is_trader_i);
+
+    $user = $db->getUserById($user_id);
+
+
+    if ($user != NULL) {
+        $response["error"] = false;
+        $response['user_name'] = $user['user_name'];
+        $response['first_name'] = $user['first_name'];
+        $response['last_name'] = $user['last_name'];
+        $response['email'] = $user['email'];
+        $response['api_key'] = $user['api_key'];
+        $response['is_collector'] = $user['is_collector'];
+        $response['is_trader'] = $user['is_trader'];
+
+    } else {
+
+        $response['error'] = true;
+        $response['message'] = "An error occurred. Please try again";
     }
 
     echoResponse(200, $response);
@@ -274,7 +328,7 @@ $app->get('/web/verify/:verification_code', function($verification_code) use ($a
     $vars = array();
     $vars["url"] = "app release url";
     if($db->checkVerification($verification_code)){
-     echo Emailer::getEmailFromTemplate($vars ,"../mail_templates/verification_accepted.html");
+        echo Emailer::getEmailFromTemplate($vars ,"../mail_templates/verification_accepted.html");
     }else{
         echo "You accidentally the whole Pok&eacute;checker.";
     }
@@ -361,6 +415,25 @@ $app->get('/sets/:id/cards', function ($set_id){
 //-----------------------------------------//
 //AUTH CALLS
 
+
+$app->get('/user/stats', 'authenticate', function() use ($app){
+
+    $response = array();
+
+    global $user_id;
+
+    $db = new DbHandler();
+    //todo make dynamic
+    $stats = $db->getUserStats($user_id, 10);
+
+    $response['error'] = false;
+    $response['stats'] = $stats;
+
+    echoResponse(200, $response);
+
+});
+
+
 /**
  * Assigning new Set to user
  * method POST
@@ -389,6 +462,7 @@ $app->post('/user/set', 'authenticate', function() use ($app) {
     }
     echoResponse(201, $response);
 });
+
 
 /**
  * Get all user sets
