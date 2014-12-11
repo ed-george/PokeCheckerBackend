@@ -325,7 +325,7 @@ class DbHandler {
 
     /* ----------------- helper functions ------------------- */
 
-    private function getScanURL($scan_url){
+    private function getImageUrlFromHost($scan_url){
 
         if($scan_url == null){
             return null;
@@ -355,7 +355,7 @@ class DbHandler {
             $tmp = array();
             $tmp["card_id"] = $id;
             $tmp["title"] = utf8_encode($title);
-            $tmp["scan_url"] = $this->getScanURL($scan_url);
+            $tmp["scan_url"] = $this->getImageUrlFromHost($scan_url);
             $tmp["card_number"] = (int) $card_number;
             $tmp["card_type"] = utf8_encode($card_type_raw);
             $tmp["pokemon_type"] = $pokemon_type_raw;
@@ -386,8 +386,8 @@ class DbHandler {
             $tmp = array();
             $tmp["id"] = $id;
             $tmp["set_name"] = $set_name;
-            $tmp["image_url"] = $image_url;
-            $tmp["set_icon"] = $set_icon;
+            $tmp["image_url"] = $this->getImageUrlFromHost($image_url);
+            $tmp["set_icon"] = $this->getImageUrlFromHost($set_icon);
             $tmp["release_date"] = $release_date;
             $tmp["is_legal"] = (bool) $is_legal;
             $tmp["cards_in_set"] = (int) $cards_in_set;
@@ -414,8 +414,8 @@ class DbHandler {
 
         $response["id"] = $id;
         $response["set_name"] = $set_name;
-        $response["image_url"] = $image_url;
-        $response["set_icon"] = $set_icon;
+        $response["image_url"] = $this->getImageUrlFromHost($image_url);
+        $response["set_icon"] = $this->getImageUrlFromHost($set_icon);
         $response["release_date"] = $release_date;
         $response["is_legal"] = (bool) $is_legal;
         $response["cards_in_set"] = (int) $cards_in_set;
@@ -454,15 +454,15 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ?");
         $stmt->bind_param("i", $series_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
 
         $response = array();
 
         while($result = $stmt->fetch()){
             $tmp = array();
             $tmp["id"] = $id;
-            $tmp["set_name"] = $set_name;
-            $tmp["image_url"] = $image_url;
+            $tmp["set_name"] = $this->getImageUrlFromHost($set_name);
+            $tmp["image_url"] = $this->getImageUrlFromHost($image_url);
             $tmp["set_icon"] = $set_icon;
             $tmp["release_date"] = $release_date;
             $tmp["is_legal"] = (bool) $is_legal;
@@ -507,8 +507,8 @@ class DbHandler {
             $tmp = array();
             $tmp["id"] = $id;
             $tmp["set_name"] = $set_name;
-            $tmp["image_url"] = $image_url;
-            $tmp["set_icon"] = $set_icon;
+            $tmp["image_url"] = $this->getImageUrlFromHost($image_url);
+            $tmp["set_icon"] = $this->getImageUrlFromHost($set_icon);
             $tmp["release_date"] = $release_date;
             $tmp["is_legal"] = (bool) $is_legal;
             $tmp["cards_in_set"] = (int) $cards_in_set;
@@ -585,7 +585,7 @@ class DbHandler {
             if(DEBUG_MODE){
                 //TODO: remove this line
                 $tmp["title"] = utf8_encode($title);
-                $tmp["scan_url"] = $this->getScanURL($scan_url);
+                $tmp["scan_url"] = $this->getImageUrlFromHost($scan_url);
                 $tmp["card_number"] = (int) $card_number;
                 $tmp["card_type"] = utf8_encode($card_type_raw);
                 $tmp["pokemon_type"] = $pokemon_type_raw;
