@@ -461,9 +461,9 @@ class DbHandler {
         while($result = $stmt->fetch()){
             $tmp = array();
             $tmp["id"] = $id;
-            $tmp["set_name"] = $this->getImageUrlFromHost($set_name);
+            $tmp["set_name"] = $set_name;
             $tmp["image_url"] = $this->getImageUrlFromHost($image_url);
-            $tmp["set_icon"] = $set_icon;
+            $tmp["set_icon"] = $this->getImageUrlFromHost($set_icon);
             $tmp["release_date"] = $release_date;
             $tmp["is_legal"] = (bool) $is_legal;
             array_push($response, $tmp);
