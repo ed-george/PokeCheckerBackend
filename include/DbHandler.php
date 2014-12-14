@@ -378,11 +378,15 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT * FROM card_set cs ORDER BY cs.id DESC");
 
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
 
         $response = array();
 
         while($result = $stmt->fetch()){
+            //TODO return subsets on request
+            if($is_subset){
+                continue;
+            }
             $tmp = array();
             $tmp["id"] = $id;
             $tmp["set_name"] = $set_name;
@@ -402,7 +406,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT * FROM card_set cs WHERE id = ?");
         $stmt->bind_param("i", $set_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
 
         $stmt->fetch();
 
@@ -454,7 +458,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ?");
         $stmt->bind_param("i", $series_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
 
         $response = array();
 
@@ -499,7 +503,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT cs.* FROM card_set cs, user_sets us WHERE cs.id = us.card_set_id AND us.user_id = ? ORDER BY cs.id DESC");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
 
         $response = array();
 
