@@ -482,7 +482,7 @@ class DbHandler {
             }
 
             $set = array();
-            $set["set_id"] = $set_id;
+            $set["id"] = $set_id;
             $set["set_name"] = $set_name;
             $set["image_url"] = $this->getImageUrlFromHost($image_url);
             $set["set_icon"] = $this->getImageUrlFromHost($set_icon);
