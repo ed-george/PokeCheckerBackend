@@ -455,7 +455,7 @@ class DbHandler {
     }
 
     public function getAllSeriesWithSets(){
-        $stmt = $this->conn->prepare("SELECT * FROM card_series cs, card_set sets WHERE cs.id = sets.series_id");
+        $stmt = $this->conn->prepare("SELECT * FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND sets.is_subset != 1");
 
         $stmt->execute();
         $stmt->bind_result($id, $series_name, $set_id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
