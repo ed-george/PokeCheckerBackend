@@ -454,6 +454,52 @@ class DbHandler {
         return $response;
     }
 
+    public function getAllSeriesWithSets(){
+        $stmt = $this->conn->prepare("SELECT * FROM card_series cs, card_set sets WHERE cs.id = sets.series_id");
+
+        $stmt->execute();
+        $stmt->bind_result($id, $series_name, $set_id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
+
+        $response = array();
+
+        $sets = array();
+        $tmp = array();
+        $curr_id = 1;
+        $last_id = 1;
+        while($result = $stmt->fetch()){
+
+            $curr_id = $id;
+
+            if($curr_id != $last_id){
+
+                $tmp["sets"] = $sets;
+                array_push($response, $tmp);
+                $sets = array();
+                $last_id = $id;
+            }else{
+                $tmp["id"] = $id;
+                $tmp["series_name"] = $series_name;
+            }
+
+            $set = array();
+            $set["set_id"] = $set_id;
+            $set["set_name"] = $set_name;
+            $set["image_url"] = $this->getImageUrlFromHost($image_url);
+            $set["set_icon"] = $this->getImageUrlFromHost($set_icon);
+            $set["release_date"] = $release_date;
+            $set["is_legal"] = (bool) $is_legal;
+
+            array_push($sets, $set);
+
+        }
+
+        $tmp["sets"] = $sets;
+        array_push($response, $tmp);
+
+        $stmt->close();
+        return $response;
+    }
+
     public function getAllSetsFromSeries($series_id){
         $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ?");
         $stmt->bind_param("i", $series_id);

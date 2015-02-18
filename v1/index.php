@@ -372,6 +372,23 @@ $app->get('/series', function(){
 });
 
 /**
+ * Get all series and their sets
+ * method GET
+ * url - /series/sets
+ */
+$app->get('/series/sets', function(){
+    $response = array();
+    $db = new DbHandler();
+
+    $result = $db->getAllSeriesWithSets();
+    $response["error"] = false;
+    $response["series"] = $result;
+
+    echoResponse(200, $response);
+});
+
+
+/**
  * Get all sets from series id
  * method GET
  * url - /series
