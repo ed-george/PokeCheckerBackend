@@ -501,7 +501,7 @@ class DbHandler {
     }
 
     public function getAllSetsFromSeries($series_id){
-        $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ? AND sets.active = 1");
+        $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ? AND sets.is_subset = 0 AND sets.active = 1");
         $stmt->bind_param("i", $series_id);
         $stmt->execute();
         $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset, $active);
@@ -688,4 +688,4 @@ class DbHandler {
 
 
 
-} 
+}
