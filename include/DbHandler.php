@@ -375,10 +375,10 @@ class DbHandler {
      */
 
     public function getAllSets(){
-        $stmt = $this->conn->prepare("SELECT * FROM card_set cs ORDER BY cs.id DESC");
+        $stmt = $this->conn->prepare("SELECT * FROM card_set cs WHERE cs.active = 1 ORDER BY cs.id DESC");
 
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset, $active);
 
         $response = array();
 
@@ -406,7 +406,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT * FROM card_set cs WHERE id = ?");
         $stmt->bind_param("i", $set_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset, $active);
 
         $stmt->fetch();
 
@@ -455,10 +455,10 @@ class DbHandler {
     }
 
     public function getAllSeriesWithSets(){
-        $stmt = $this->conn->prepare("SELECT * FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND sets.is_subset != 1");
+        $stmt = $this->conn->prepare("SELECT * FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND sets.is_subset != 1 AND sets.active = 1");
 
         $stmt->execute();
-        $stmt->bind_result($id, $series_name, $set_id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
+        $stmt->bind_result($id, $series_name, $set_id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset, $active);
 
         $response = array();
 
@@ -501,10 +501,10 @@ class DbHandler {
     }
 
     public function getAllSetsFromSeries($series_id){
-        $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ?");
+        $stmt = $this->conn->prepare("SELECT sets.* FROM card_series cs, card_set sets WHERE cs.id = sets.series_id AND cs.id = ? AND sets.active = 1");
         $stmt->bind_param("i", $series_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset, $active);
 
         $response = array();
 
@@ -549,7 +549,7 @@ class DbHandler {
         $stmt = $this->conn->prepare("SELECT cs.* FROM card_set cs, user_sets us WHERE cs.id = us.card_set_id AND us.user_id = ? ORDER BY cs.id DESC");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
-        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset);
+        $stmt->bind_result($id, $set_name, $image_url, $set_icon, $release_date, $is_legal, $series_id, $cards_in_set, $is_subset, $active);
 
         $response = array();
 
