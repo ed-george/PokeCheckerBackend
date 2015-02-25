@@ -432,6 +432,31 @@ $app->get('/sets/:id/cards', function ($set_id){
 //-----------------------------------------//
 //AUTH CALLS
 
+/**
+ * Create/Update user cards
+ * method POST
+ * params - quantity
+ * url - /user/card/:card_id
+ */
+$app->post('/user/card/:id', 'authenticate', function($card_id) use ($app){
+    $response = array();
+    verifyRequiredParams(array('quantity'));
+    $quant = $app->request->post('quantity');
+
+    if($quant <= 0 || $quant >= 100){
+        $response['error'] = true;
+        $response['message'] = "Please enter a valid quantity";
+        echoResponse(400, $response);
+        return;
+    }
+
+    global $user_id;
+    $db = new DbHandler();
+    $db->updateUserAssignedCard($user_id, $card_id, $quant);
+    $response['error'] = false;
+    echoResponse(200, $response);
+});
+
 
 $app->get('/user/stats', 'authenticate', function() use ($app){
 
