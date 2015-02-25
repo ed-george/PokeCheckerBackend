@@ -454,6 +454,8 @@ $app->post('/user/card/:id', 'authenticate', function($card_id) use ($app){
     $db = new DbHandler();
     $db->updateUserAssignedCard($user_id, $card_id, $quant);
     $response['error'] = false;
+    $response['id'] = (int) $card_id;
+    $response['quantity'] = (int) $quant;
     echoResponse(200, $response);
 });
 
