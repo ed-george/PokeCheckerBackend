@@ -649,6 +649,32 @@ class DbHandler {
         return $response;
     }
 
+    public function getAllUserCardsFromSet($user_id, $set_id){
+
+        $stmt = $this->conn->prepare("SELECT c.*, IFNULL(uc.quantity, 0) AS quantity FROM cards c LEFT JOIN user_cards uc ON c.id = uc.card_id AND uc.user_id = ? WHERE c.card_set_id = ? ORDER BY c.card_number ASC");
+        $stmt->bind_param("ii", $user_id, $set_id);
+        $stmt->execute();
+        $stmt->bind_result($id, $title, $scan_url, $card_type_id, $card_rarity_id, $card_set_id, $type_id, $card_number, $set_raw, $card_type_raw, $pokemon_type_raw, $rarity_raw, $quantity);
+
+        $response = array();
+
+        while($result = $stmt->fetch()){
+            $tmp = array();
+            $tmp["card_id"] = $id;
+            $tmp["title"] = utf8_encode($title);
+            $tmp["scan_url"] = $this->getImageUrlFromHost($scan_url);
+            $tmp["card_number"] = (int) $card_number;
+            $tmp["card_type"] = utf8_encode($card_type_raw);
+            $tmp["pokemon_type"] = $pokemon_type_raw;
+            $tmp["rarity"] = $rarity_raw;
+            $tmp["quantity"] = (int) $quantity;
+            array_push($response, $tmp);
+        }
+
+        $stmt->close();
+        return $response;
+    }
+
     /**
      * Updating user cards
      * @param String $user_id id of the user

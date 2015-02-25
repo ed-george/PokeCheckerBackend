@@ -554,9 +554,9 @@ $app->delete('/user/set/:id', 'authenticate', function($set_id) use ($app){
  * Get user cards from sets
  * method GET
  * params - id
- * url - /user/set/:id/cards
+ * url - /user/sets/:id/cards
  */
-$app->get('/user/set/:id/cards', 'authenticate', function($set_id) use ($app){
+$app->get('/user/sets/:id/cards', 'authenticate', function($set_id) use ($app){
 
     $response = array();
 
@@ -576,6 +576,31 @@ $app->get('/user/set/:id/cards', 'authenticate', function($set_id) use ($app){
         $response["error"] = true;
         $response["message"] = "Sorry, you aren't currently subscribed to this set.";
     }
+    echoResponse(200, $response);
+});
+
+/**
+ * Get all cards from sets with user quantities
+ * method GET
+ * params - id
+ * url - /user/sets/:id/cards
+ */
+$app->get('/user/sets/:id/cards/all', 'authenticate', function($set_id) use ($app){
+
+    $response = array();
+
+    global $user_id;
+    $db = new DbHandler();
+    $cards = $db->getAllUserCardsFromSet($user_id, $set_id);
+    $set = $db->getSet($set_id);
+
+    if($set["cards_in_set"] == 0){
+        $set["cards_in_set"] = count($cards);
+    }
+
+    $response["error"] = false;
+    $response["set"] = $set;
+    $response["cards"] = $cards;
     echoResponse(200, $response);
 });
 
