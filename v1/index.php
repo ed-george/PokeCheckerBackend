@@ -443,7 +443,7 @@ $app->post('/user/card/:id', 'authenticate', function($card_id) use ($app){
     verifyRequiredParams(array('quantity'));
     $quant = $app->request->post('quantity');
 
-    if($quant <= 0 || $quant >= 100){
+    if($quant < 0 || $quant >= 100){
         $response['error'] = true;
         $response['message'] = "Please enter a valid quantity";
         echoResponse(400, $response);
