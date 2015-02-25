@@ -657,8 +657,9 @@ class DbHandler {
      * @return int
      */
     public function updateUserAssignedCard($user_id, $card_id, $quantity) {
-        $stmt = $this->conn->prepare("UPDATE user_cards uc SET uc.quantity = ?  WHERE uc.card_id = ? AND uc.user_id = ?");
-        $stmt->bind_param("iii", $quantity, $card_id, $user_id);
+
+        $stmt = $this->conn->prepare("INSERT INTO user_cards SET user_id = ?, card_id = ?, quantity = ? ON DUPLICATE KEY UPDATE user_id = ?, card_id = ?, quantity = ?");
+        $stmt->bind_param("iiiiii", $user_id, $card_id, $quantity, $user_id, $card_id, $quantity);
         $stmt->execute();
         $num_affected_rows = $stmt->affected_rows;
         $stmt->close();
